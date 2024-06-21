@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promptathon</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5">Llamathon</h1>
+        <div id="challenges" class="mt-4">
+            <h2>Challenges</h2>
+            <div id="challenge-list" class="list-group"></div>
+        </div>
+        <div id="prompt-form" class="mt-4" style="display: none;">
+            <h2>Write your Prompt</h2>
+            <div id="example-buttons" class="btn-group mb-3" role="group"></div>
+            <div id="example-details" class="mt-3">
+                <p><strong>Input:</strong>
+                <pre><span id="example-input"></span></pre>
+                </p>
+                <p><strong>Expected Result:</strong> <span id="example-expected"></span></p>
+            </div>
+            <form id="submit-prompt-form">
+                <div class="form-group">
+                    <label for="prompt">Prompt</label>
+                    <textarea id="prompt" class="form-control" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+                <button type="button" class="btn btn-secondary" id="prev-button">Prev</button>
+                <button type="button" class="btn btn-secondary" id="next-button">Next</button>
+            </form>
+            <div id="result" class="mt-4"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

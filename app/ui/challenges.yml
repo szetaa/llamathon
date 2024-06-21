@@ -1,0 +1,71 @@
+check_email_action:
+  title: "Check if an email requires direct action"
+  description: "Given an email, check if it requires a direct action/response to the person receiving it."
+  examples:
+    Example_01:
+      input: |
+        From: alice@example.com
+        To: bob@example.com
+        Subject: Document Review Needed
+
+        Hi Bob,
+
+        Please review the attached document and let me know your thoughts.
+
+        Thanks,
+        Alice
+      expected: "Yes: review"
+    Example_02: 
+      input: |
+        From: charlie@example.com
+        To: dave@example.com
+        Subject: Thanks!
+
+        Hi Dave,
+
+        Just wanted to say thank you for your help!
+
+        Best,
+        Charlie
+      expected: "No action required"
+    Example_03:
+      input: |
+        From: emma@example.com
+        To: frank@example.com
+        Subject: Report Needed
+
+        Hi Frank,
+
+        Can you send me the report by end of day?
+
+        Regards,
+        Emma
+      expected: "Yes: send report by EOD"
+
+entity_recognition:
+  title: "Entity Recognition in Financial Documents"
+  description: "Identify and extract key entities such as company names, dates, monetary amounts, and percentages from financial documents."
+  examples:
+    Example_01:
+      input: "On March 15, 2023, Acme Corp reported a quarterly revenue of $10 million, a 5% increase from the previous quarter."
+      expected: "Entities: {'Date': 'March 15, 2023', 'Company': 'Acme Corp', 'Monetary Amount': '$10 million', 'Percentage': '5%'}"
+    Example_02:
+      input: "The acquisition of XYZ Inc. was completed on July 22, 2022, for a total of $50 million."
+      expected: "Entities: {'Date': 'July 22, 2022', 'Company': 'XYZ Inc.', 'Monetary Amount': '$50 million'}"
+    Example_03:
+      input: "In Q1 2023, revenue grew by 8% to reach $25 million."
+      expected: "Entities: {'Date': 'Q1 2023', 'Percentage': '8%', 'Monetary Amount': '$25 million'}"
+
+sentiment_analysis:
+  title: "Sentiment Analysis of Financial News"
+  description: "Analyze the sentiment of financial news articles to determine if the tone is positive, negative, or neutral."
+  examples:
+    Example_01:
+      input: "The stock market reached an all-time high today, driven by strong earnings reports from major tech companies."
+      expected: "Sentiment: Positive"
+    Example_02:
+      input: "Despite the recent downturn, analysts remain optimistic about the long-term growth potential of the energy sector."
+      expected: "Sentiment: Neutral"
+    Example_03:
+      input: "Shares of the company plummeted after it reported worse-than-expected quarterly losses."
+      expected: "Sentiment: Negative"
