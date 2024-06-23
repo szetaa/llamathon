@@ -3,9 +3,10 @@ check_email_action:
   description: "Given an email, check if it requires a direct action/response to the person receiving it."
   examples:
     Example_01:
-      input: |
+      input: |-
         From: alice@example.com
         To: bob@example.com
+
         Subject: Document Review Needed
 
         Hi Bob,
@@ -19,6 +20,7 @@ check_email_action:
       input: |
         From: charlie@example.com
         To: dave@example.com
+
         Subject: Thanks!
 
         Hi Dave,
@@ -27,11 +29,12 @@ check_email_action:
 
         Best,
         Charlie
-      expected: "No action required"
+      expected: "No action"
     Example_03:
       input: |
         From: emma@example.com
         To: frank@example.com
+        
         Subject: Report Needed
 
         Hi Frank,
@@ -42,30 +45,221 @@ check_email_action:
         Emma
       expected: "Yes: send report by EOD"
 
-entity_recognition:
-  title: "Entity Recognition in Financial Documents"
-  description: "Identify and extract key entities such as company names, dates, monetary amounts, and percentages from financial documents."
+identify_inconsistencies:
+  title: "Identify Inconsistencies in Meeting Minutes"
+  description: "Given the minutes of a meeting, identify any inconsistencies such as actions assigned to excused attendees, due dates set in the past, or actions that contradict the current context."
   examples:
     Example_01:
-      input: "On March 15, 2023, Acme Corp reported a quarterly revenue of $10 million, a 5% increase from the previous quarter."
-      expected: "Entities: {'Date': 'March 15, 2023', 'Company': 'Acme Corp', 'Monetary Amount': '$10 million', 'Percentage': '5%'}"
-    Example_02:
-      input: "The acquisition of XYZ Inc. was completed on July 22, 2022, for a total of $50 million."
-      expected: "Entities: {'Date': 'July 22, 2022', 'Company': 'XYZ Inc.', 'Monetary Amount': '$50 million'}"
-    Example_03:
-      input: "In Q1 2023, revenue grew by 8% to reach $25 million."
-      expected: "Entities: {'Date': 'Q1 2023', 'Percentage': '8%', 'Monetary Amount': '$25 million'}"
+      input: |-
+        **Date:** March 1, 2023  
+        **Topic:** Project Timeline Finalization  
+        **Attendees:** Alice, Bob, Dave  
+        **Excused:** Carol  
 
-sentiment_analysis:
-  title: "Sentiment Analysis of Financial News"
-  description: "Analyze the sentiment of financial news articles to determine if the tone is positive, negative, or neutral."
+        **Action Points:**
+        - **Alice:** Finalize the project timeline by next week.
+        - **Bob:** Ensure all team members are updated on their tasks.
+        - **Dave:** Schedule a follow-up meeting for this Friday to discuss updates.
+        - **Carol:** Take the lead on the timeline finalization.
+        - **Alice:** Review the completed timeline by February 28, 2023.
+      expected: |-
+        Potential problems in the meeting minutes:
+        - Carol is excused but is assigned to lead the timeline finalization.
+        - Alice has an action point due in the past (February 28, 2023).
+    Example_02:
+      input: |-
+        **Date:** April 10, 2023  
+        **Topic:** Marketing Campaign Revision  
+        **Attendees:** John, Jane, Mike  
+        **Excused:** Tom  
+
+        **Action Points:**
+        - **Jane:** Start working on revising the marketing campaign to include the new product features.
+        - **Tom:** Send Jane the draft by the end of next week.
+        - **Mike:** Look into updating the website to reflect the changes.
+        - **Jane:** Coordinate with Tom on the website updates.
+        - **Mike:** Allocate a budget for the campaign revision, despite the budget being frozen.
+      expected: |-
+        Potential problems in the meeting minutes:
+        - Tom is excused but is assigned to send Jane the draft.
+        - Mike is asked to allocate a budget despite the budget being frozen.
+    Example_03:
+      input: |-
+        **Date:** August 12, 2023  
+        **Topic:** Quarterly Financial Review  
+        **Attendees:** Emily, Jack, Olivia  
+        **Excused:** Michael  
+
+        **Action Points:**
+        - **Emily:** Prepare the detailed financial report for Q3 by September 1, 2023.
+        - **Jack:** Analyze the revenue trends and present findings in the next meeting.
+        - **Olivia:** Coordinate with the marketing team to forecast the sales for the upcoming quarter.
+        - **Jack:** Ensure the analysis includes data from all departments.
+        - **Emily:** Schedule the next financial review meeting for October 10, 2023.
+      expected: No problems found.
+
+
+
+
+extract_entities_and_sentiment:
+  title: "Extract Entities and related sentiment"
+  description: "Identify and extract company names from financial documents and analyze the sentiment associated with each company."
   examples:
     Example_01:
-      input: "The stock market reached an all-time high today, driven by strong earnings reports from major tech companies."
-      expected: "Sentiment: Positive"
+      input: |-
+        The acquisition of XYZ Inc. was completed on July 22, 2022, for a total of $50 million. 
+        The market responded negatively, citing concerns over the high acquisition cost and potential integration issues. 
+        Despite the negative market reaction, the CEO of XYZ Inc. stated that this acquisition would strategically 
+        position the company for long-term growth.
+      expected: '[{"Company": "XYZ Inc.", "Sentiment": "Negative"}]'
     Example_02:
-      input: "Despite the recent downturn, analysts remain optimistic about the long-term growth potential of the energy sector."
-      expected: "Sentiment: Neutral"
+      input: |-
+        In Q1 2023, revenue grew by 8% to reach $25 million for Tech Solutions. 
+        Analysts have a neutral outlook on the company's future performance, noting that while the revenue growth is promising, 
+        there are concerns about the company's high operational costs. Tech Solutions plans to address these concerns by 
+        implementing cost-cutting measures in the next quarter.
+      expected: '[{"Company": "Tech Solutions", "Sentiment": "Neutral"}]'
     Example_03:
-      input: "Shares of the company plummeted after it reported worse-than-expected quarterly losses."
-      expected: "Sentiment: Negative"
+      input: |-
+        During the annual financial review, both Global Industries and Innovatech Corp presented their quarterly earnings. 
+        Global Industries reported a significant decrease in profits due to rising operational costs, leading to a negative 
+        market sentiment. On the other hand, Innovatech Corp announced a groundbreaking new product that boosted their stock 
+        prices and received positive feedback from investors. Additionally, TechWorks Inc. showed stable growth but had mixed 
+        reviews from analysts due to uncertain future projections.
+      expected: |-
+        [{"Company": "Global Industries", "Sentiment": "Negative"}, 
+         {"Company": "Innovatech Corp", "Sentiment": "Positive"}, 
+         {"Company": "TechWorks Inc.", "Sentiment": "Neutral"}]
+
+classify_support_tickets:
+  title: "Classify Support Tickets by Implicit Urgency"
+  description: "Given a support ticket, classify it as 'Low', 'Medium', or 'High' urgency based on the situation and tone used by the user."
+  examples:
+    Example_01:
+      input: |
+        Ticket ID: 12345
+        Subject: Unable to Access Account
+
+        I have been unable to access my account for the past two days. 
+        This issue is severely affecting my work, and I need immediate assistance. Please resolve this as soon as possible.
+
+        Thanks,
+        John Doe
+      expected: "High"
+    Example_02:
+      input: |
+        Ticket ID: 67890
+        Subject: Question About Product Warranty
+
+        Hi,
+
+        I recently purchased a laptop and would like to know the details of the warranty period. 
+        Please provide the information at your earliest convenience.
+
+        Best,
+        Jane Smith
+      expected: "Low"
+    Example_03:
+      input: |
+        Ticket ID: 24680
+        Subject: Software Installation Issue
+
+        Hello,
+
+        I am experiencing issues with installing the software I purchased. 
+        It is causing some delays in my work, and I would appreciate it if someone could help me resolve this within the next few days.
+
+        Regards,
+        Michael Brown
+      expected: "Medium"
+
+
+summarize_survey_feedback:
+  title: "Summarize Survey Feedback"
+  description: "Given a set of free-form feedback responses from a survey, generate a concise summary that captures the main points mentioned by respondents, classified into categories."
+  examples:
+    Example_01:
+      input: |-
+        **Survey Question:** What can we do better in the coming event?
+        
+        **Responses:**
+        - "I think the event could benefit from more networking opportunities."
+        - "The sessions were great, but they could be a bit shorter."
+        - "More hands-on workshops would be appreciated."
+        - "The venue was too far from the city center, a more central location would be better."
+        - "Better food options would be nice."
+        - "It would be helpful to have more breaks between sessions."
+        - "The keynote speech was too long, it could be more concise."
+        - "More interactive sessions would keep the audience engaged."
+        - "The Wi-Fi connection at the venue was poor, which made it difficult to stay connected."
+        - "Providing a shuttle service from the city center to the venue would be great."
+        - "The sessions were too long and sometimes repetitive."
+        - "Offering vegetarian and vegan food options would be appreciated."
+        - "Networking sessions should be scheduled earlier in the day."
+        - "The venue was difficult to reach, consider a more accessible location."
+      expected: |-
+        **Networking:**
+        - More networking opportunities
+        - Networking sessions should be scheduled earlier in the day
+
+        **Sessions:**
+        - Shorter sessions
+        - More hands-on workshops
+        - More interactive sessions
+        - More breaks between sessions
+        - Sessions were sometimes repetitive
+
+        **Venue:**
+        - More central location
+        - Venue was difficult to reach, consider a more accessible location
+        - Providing a shuttle service from the city center
+        - Wi-Fi connection at the venue was poor
+
+        **Food:**
+        - Better food options
+        - Offering vegetarian and vegan food options
+
+        **Keynote:**
+        - Keynote speech was too long, could be more concise
+
+    Example_02:
+      input: |-
+        **Survey Question:** What did you like most about this event?
+
+        **Responses:**
+        - "I really enjoyed the keynote speaker, they were very inspiring."
+        - "The variety of sessions available was fantastic."
+        - "The hands-on workshops were very informative."
+        - "I appreciated the networking opportunities."
+        - "The event was well-organized and ran smoothly."
+        - "The keynote was extremely motivational and set a great tone for the event."
+        - "I loved the interactive sessions, they kept me engaged."
+        - "The venue was excellent, very comfortable and accessible."
+        - "Networking with other professionals was very beneficial."
+        - "The organization of the event was top-notch."
+        - "The food was great, especially the vegan options."
+        - "The variety of topics covered in the sessions was impressive."
+      expected: |-
+        **Keynote:**
+        - Keynote speaker was very inspiring
+        - Keynote was extremely motivational and set a great tone
+
+        **Sessions:**
+        - Variety of sessions available was fantastic
+        - Hands-on workshops were very informative
+        - Interactive sessions kept me engaged
+        - Variety of topics covered was impressive
+
+        **Networking:**
+        - Appreciated the networking opportunities
+        - Networking with other professionals was very beneficial
+
+        **Organization:**
+        - Event was well-organized and ran smoothly
+        - Organization of the event was top-notch
+
+        **Venue:**
+        - Venue was excellent, very comfortable and accessible
+
+        **Food:**
+        - Food was great, especially the vegan options

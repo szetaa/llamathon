@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const challengeList = document.getElementById('challenge-list');
     const promptForm = document.getElementById('prompt-form');
+    const challengeDetailsContainer = document.getElementById('challenge-details');
     const exampleButtonsContainer = document.getElementById('example-buttons');
     const exampleInput = document.getElementById('example-input');
     const exampleExpected = document.getElementById('example-expected');
@@ -8,10 +9,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resultDiv = document.getElementById('result');
     const prevButton = document.getElementById('prev-button');
     const nextButton = document.getElementById('next-button');
+    const finalSubmitButton = document.getElementById('final-submit-button');
+    const confirmFinalSubmitButton = document.getElementById('confirm-final-submit');
     let selectedChallenge = null;
     let examples = [];
     let currentHistoryIndex = -1;
     let promptHistories = JSON.parse(localStorage.getItem('promptHistories')) || {};
+    let challengeStatuses = JSON.parse(localStorage.getItem('challengeStatuses')) || {};
 
     // Fetch and parse the YAML file
     async function fetchChallenges() {
@@ -25,24 +29,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Populate the challenge list
+    // Populate the challenge list as a dropdown
+    const challengeDropdown = document.getElementById('challengeDropdown');
     const challenges = await fetchChallenges();
     for (const [key, challenge] of Object.entries(challenges)) {
-        const challengeItem = document.createElement('a');
-        challengeItem.href = "#";
-        challengeItem.classList.add('list-group-item', 'list-group-item-action');
-        challengeItem.textContent = challenge.title;
-        challengeItem.addEventListener('click', () => {
-            selectedChallenge = challenge;
-            examples = Object.entries(challenge.examples).map(([name, details]) => ({
-                name,
-                ...details
-            }));
-            populateExamples(examples);
-            showPromptForm();
-            loadHistoryForChallenge(challenge.title);
-        });
-        challengeList.appendChild(challengeItem);
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = challenge.title;
+        challengeDropdown.appendChild(option);
+    }
+
+    // Handle dropdown change event
+    challengeDropdown.addEventListener('change', (event) => {
+        const selectedKey = event.target.value;
+        const challenge = challenges[selectedKey];
+        selectedChallenge = challenge;
+        examples = Object.entries(challenge.examples).map(([name, details]) => ({
+            name,
+            ...details
+        }));
+        populateChallengeDetails(challenge)
+        populateExamples(examples);
+        showPromptForm();
+        loadHistoryForChallenge(challenge.title);
+        updateFinalSubmitButton();
+    });
+
+    // Populate challenge details
+    function populateChallengeDetails(challenge) {
+        challengeDetailsContainer.innerHTML = challenge.description
     }
 
     // Populate the examples
@@ -77,8 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Display example details
     function displayExampleDetails(example) {
-        exampleInput.textContent = example.input;
-        exampleExpected.textContent = example.expected;
+        exampleInput.innerHTML = marked.parse(example.input);
+        exampleExpected.innerHTML = marked.parse(example.expected);
     }
 
     // Show prompt form for the selected challenge
@@ -163,5 +178,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const historyItem = promptHistories[selectedChallenge.title][index];
         document.getElementById('prompt').value = historyItem.prompt;
         displayExampleDetails(historyItem.example);
+    }
+
+    // Handle final submit button click
+    finalSubmitButton.addEventListener('click', () => {
+        $('#finalSubmitModal').modal('show');
+    });
+
+    // Handle confirm final submit button click
+    confirmFinalSubmitButton.addEventListener('click', () => {
+        challengeStatuses[selectedChallenge.title] = 'submitted';
+        localStorage.setItem('challengeStatuses', JSON.stringify(challengeStatuses));
+        $('#finalSubmitModal').modal('hide');
+        updateFinalSubmitButton();
+    });
+
+    // Update the final submit button based on challenge status
+    function updateFinalSubmitButton() {
+        if (challengeStatuses[selectedChallenge.title] === 'submitted') {
+            finalSubmitButton.disabled = true;
+        } else {
+            finalSubmitButton.disabled = false;
+        }
     }
 });
